@@ -99,7 +99,7 @@ export default function App() {
   const [severityFilter, setSeverityFilter] = useState<string>('all');
   const [copiedFixId, setCopiedFixId] = useState<string | null>(null);
 
-  const API_BASE = 'http://localhost:8000/api';
+  const API_BASE = '/api';
 
   const runAnalysis = async (url: string) => {
     setLoading(true);

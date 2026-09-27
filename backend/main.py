@@ -12,6 +12,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from agents.pipeline import DevPulsePipeline
 from github_service import fetch_github_pr_files
 
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
 app = FastAPI(
     title="DevPulse AI API",
     description="Autonomous Codebase Health, Security Audit & PR Refactoring Agent API",
@@ -27,6 +30,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount Frontend Static Build
+frontend_dist = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend", "dist")
+if os.path.exists(frontend_dist):
+    assets_dir = os.path.join(frontend_dist, "assets")
+    if os.path.exists(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
+@app.get("/")
+def serve_frontend():
+    index_path = os.path.join(frontend_dist, "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    return {"message": "DevPulse AI Server Active. Frontend dist/index.html not found."}
+
 pipeline = DevPulsePipeline()
 
 class PRAnalysisRequest(BaseModel):
@@ -40,6 +57,7 @@ class CreatePRRequest(BaseModel):
 
 @app.get("/api/health")
 def health_check():
+
     return {
         "status": "healthy",
         "service": "DevPulse AI Backend",
