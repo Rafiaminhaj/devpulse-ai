@@ -101,7 +101,10 @@ export default function App() {
   const [severityFilter, setSeverityFilter] = useState<string>('all');
   const [copiedFixId, setCopiedFixId] = useState<string | null>(null);
 
-  const API_BASE = window.location.port === '5173' ? 'http://127.0.0.1:8000/api' : '/api';
+  const API_BASE = import.meta.env.VITE_API_URL 
+    || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.port === '5173'
+        ? 'http://127.0.0.1:8000/api'
+        : '/api');
 
   const runAnalysis = async (url: string) => {
     setLoading(true);
