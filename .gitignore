@@ -22,3 +22,6 @@ build/
 Thumbs.db
 .vscode/
 .idea/
+test_jira.py
+test_full_jira_pipeline.py
+

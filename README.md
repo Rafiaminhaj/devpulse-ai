@@ -38,12 +38,18 @@ DevPulse operates via a 3-agent sequential workflow:
 
 > 💡 **Note on Auto-Fix Scope**: Auto-Fix currently generates verified diffs for **hardcoded secrets**, **SQL injection**, and **resource leaks / missing error handling**. Findings that require human architectural judgment (e.g. high cyclomatic complexity refactoring) are flagged with a **`"Manual review recommended"`** badge instead of generating an unsafe automated fix.
 
+4. 🎫 **Automated Jira REST API Ticket Triage**
+   - Automatically triages Critical and High severity findings directly into Jira Cloud as structured `Bug` tickets via Atlassian REST API v3 (using ADF - Atlassian Document Format).
+   - Embeds affected file, line numbers, and proposed code diff patches directly inside the Jira issue description.
+   - Includes feature toggle control (`JIRA_INTEGRATION_ENABLED=true/false`) and renders clickable ticket links directly in the DevPulse UI.
+
 ---
 
 ## 💻 Tech Stack
 
 - **Frontend**: React 18, Vite, TypeScript, Tailwind CSS v4, Lucide Icons, Glassmorphism Dark Theme.
 - **Backend**: Python 3.11, FastAPI, Uvicorn, Pydantic, Requests.
+- **Integrations**: Atlassian Jira Cloud REST API v3 (Automated Issue Triage & ADF Formatting).
 - **Scanners & Analysis**: AST (Abstract Syntax Tree) NodeVisitors, Shannon Entropy Estimator, Regex Pattern Matching, Unified Diff Generators (`difflib`).
 - **Sandbox Environment**: Isolated temporary execution & compilation sandbox (`py_compile` + AST re-scan).
 

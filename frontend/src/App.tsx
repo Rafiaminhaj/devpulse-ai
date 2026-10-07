@@ -51,6 +51,8 @@ interface Finding {
   cwe: string;
   auto_fixable?: boolean;
   manual_review_note?: string;
+  jira_ticket_key?: string;
+  jira_ticket_url?: string;
 }
 
 interface Fix {
@@ -99,7 +101,7 @@ export default function App() {
   const [severityFilter, setSeverityFilter] = useState<string>('all');
   const [copiedFixId, setCopiedFixId] = useState<string | null>(null);
 
-  const API_BASE = '/api';
+  const API_BASE = window.location.port === '5173' ? 'http://127.0.0.1:8000/api' : '/api';
 
   const runAnalysis = async (url: string) => {
     setLoading(true);
@@ -790,6 +792,17 @@ export default function App() {
                             <span className="px-2 py-0.5 text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded flex items-center gap-1">
                               <AlertTriangle className="w-3 h-3 text-amber-400" /> Manual review recommended
                             </span>
+                          )}
+                          {finding.jira_ticket_url && (
+                            <a
+                              href={finding.jira_ticket_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-2 py-0.5 text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/40 rounded flex items-center gap-1 hover:bg-blue-500/30 transition-all cursor-pointer"
+                              title="Open Jira Issue Ticket"
+                            >
+                              🔗 Jira Ticket: {finding.jira_ticket_key || 'View Ticket'}
+                            </a>
                           )}
                           <span className="text-xs text-slate-500 font-mono">
                             {finding.file}:{finding.line}
