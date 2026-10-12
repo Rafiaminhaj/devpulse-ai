@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { 
   ShieldCheck, 
   Zap, 
@@ -16,7 +16,9 @@ import {
   Lock,
   Code2,
   Bug,
-  Check
+  Check,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 interface CategoryScore {
@@ -100,6 +102,11 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [severityFilter, setSeverityFilter] = useState<string>('all');
   const [copiedFixId, setCopiedFixId] = useState<string | null>(null);
+
+  const [theme, setTheme] = useState<"dark" | "light">(() => {
+    const savedTheme = localStorage.getItem('theme');
+    return savedTheme === 'light' ? 'light' : 'dark';
+  })
 
   const API_BASE = import.meta.env.VITE_API_URL 
     || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.port === '5173'
@@ -205,22 +212,48 @@ export default function App() {
     }
   };
 
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.toggle("dark", theme === "dark");
+    root.classList.toggle('light-theme', theme === 'light');
+
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
   return (
-    <div className="min-h-screen bg-[#070a12] text-slate-100 flex flex-col selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-white text-slate-900 dark:bg-[#070a12] dark:text-slate-100 flex flex-col selection:bg-indigo-500 selection:text-white transition-colors duration-300">
       {/* Background ambient glow */}
       <div className="fixed top-0 left-1/4 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[140px] pointer-events-none" />
       <div className="fixed bottom-0 right-1/4 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[140px] pointer-events-none" />
 
       {/* Top Header Navbar */}
-      <header className="sticky top-0 z-50 glass-card border-b border-slate-800/80 px-6 py-4">
+      <header className="sticky top-0 z-50 glass-card border-b border-slate-200 dark:border-slate-800/80 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
+          
+          <button
+              type="button"
+              onClick={() =>
+                setTheme((current) => (current === 'dark' ? 'light' : 'dark'))
+              }
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900/80 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
+            >
+              {theme === 'dark' ? (
+                <Sun className="w-5 h-5" />
+              ) : (
+                <Moon className="w-5 h-5" />
+              )}
+            </button>
+            
           <div className="flex items-center gap-3">
             <div className="p-2.5 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg shadow-indigo-500/25">
               <Zap className="w-6 h-6 text-white" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+                <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-slate-900 via-slate-700 to-slate-500 dark:from-white dark:via-slate-200 dark:to-slate-400 bg-clip-text text-transparent">
                   DevPulse AI
                 </span>
                 <span className="px-2 py-0.5 text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-full">
@@ -249,7 +282,7 @@ export default function App() {
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-8 space-y-10 z-10">
         {/* Landing Page Hero & Search Box */}
         <section className="text-center space-y-6 max-w-3xl mx-auto pt-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium bg-purple-500/10 text-purple-300 border border-purple-500/20 mb-2">
+          <div className="inline-flex items-center gap-2 rounded-full border border-purple-200 bg-purple-100 px-4 py-2 text-sm font-semibold text-purple-800 dark:border-purple-500/30 dark:bg-purple-500/10 dark:text-purple-300">
             <Sparkles className="w-3.5 h-3.5 text-purple-400" />
             3-Agent Sequential Verification Pipeline
           </div>
@@ -267,7 +300,7 @@ export default function App() {
           </p>
 
           {/* PR Search Input Form */}
-          <div className="glass-card p-3 rounded-2xl shadow-2xl border border-slate-800 space-y-3">
+          <div className="glass-card p-3 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 space-y-3">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
