@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { 
   ShieldCheck, 
   Zap, 
@@ -16,7 +16,9 @@ import {
   Lock,
   Code2,
   Bug,
-  Check
+  Check,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 interface CategoryScore {
@@ -100,6 +102,11 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [severityFilter, setSeverityFilter] = useState<string>('all');
   const [copiedFixId, setCopiedFixId] = useState<string | null>(null);
+
+  const [theme, setTheme] = useState<"dark" | "light">(() => {
+    const savedTheme = localStorage.getItem('theme');
+    return savedTheme === 'light' ? 'light' : 'dark';
+  })
 
   const API_BASE = import.meta.env.VITE_API_URL 
     || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.port === '5173'
@@ -205,22 +212,48 @@ export default function App() {
     }
   };
 
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.toggle("dark", theme === "dark");
+    root.classList.toggle('light-theme', theme === 'light');
+
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
   return (
-    <div className="min-h-screen bg-[#070a12] text-slate-100 flex flex-col selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-white text-slate-900 dark:bg-[#070a12] dark:text-slate-100 flex flex-col selection:bg-indigo-500 selection:text-white transition-colors duration-300">
       {/* Background ambient glow */}
       <div className="fixed top-0 left-1/4 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[140px] pointer-events-none" />
       <div className="fixed bottom-0 right-1/4 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[140px] pointer-events-none" />
 
       {/* Top Header Navbar */}
-      <header className="sticky top-0 z-50 glass-card border-b border-slate-800/80 px-6 py-4">
+      <header className="sticky top-0 z-50 glass-card border-b border-slate-200 dark:border-slate-800/80 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
+          
+          <button
+              type="button"
+              onClick={() =>
+                setTheme((current) => (current === 'dark' ? 'light' : 'dark'))
+              }
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900/80 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
+            >
+              {theme === 'dark' ? (
+                <Sun className="w-5 h-5" />
+              ) : (
+                <Moon className="w-5 h-5" />
+              )}
+            </button>
+            
           <div className="flex items-center gap-3">
             <div className="p-2.5 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg shadow-indigo-500/25">
               <Zap className="w-6 h-6 text-white" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+                <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-slate-900 via-slate-700 to-slate-500 dark:from-white dark:via-slate-200 dark:to-slate-400 bg-clip-text text-transparent">
                   DevPulse AI
                 </span>
                 <span className="px-2 py-0.5 text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-full">
@@ -249,12 +282,12 @@ export default function App() {
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-8 space-y-10 z-10">
         {/* Landing Page Hero & Search Box */}
         <section className="text-center space-y-6 max-w-3xl mx-auto pt-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium bg-purple-500/10 text-purple-300 border border-purple-500/20 mb-2">
+          <div className="inline-flex items-center gap-2 rounded-full border border-purple-200 bg-purple-100 px-4 py-2 text-sm font-semibold text-purple-800 dark:border-purple-500/30 dark:bg-purple-500/10 dark:text-purple-300">
             <Sparkles className="w-3.5 h-3.5 text-purple-400" />
             3-Agent Sequential Verification Pipeline
           </div>
 
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
+          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
             Autonomous PR Audit & <br />
             <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
               Verified Auto-Fix Engine
@@ -267,7 +300,7 @@ export default function App() {
           </p>
 
           {/* PR Search Input Form */}
-          <div className="glass-card p-3 rounded-2xl shadow-2xl border border-slate-800 space-y-3">
+          <div className="glass-card p-3 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 space-y-3">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -284,7 +317,7 @@ export default function App() {
                   value={prUrl}
                   onChange={(e) => setPrUrl(e.target.value)}
                   placeholder="https://github.com/owner/repo/pull/123"
-                  className="w-full pl-10 pr-4 py-3 bg-slate-900/90 border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono"
+                  className="w-full pl-10 pr-4 py-3 bg-white text-slate-900 border border-slate-300 rounded-xl text-sm placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono dark:bg-slate-900/90 dark:text-slate-100 dark:border-slate-800 dark:placeholder-slate-500"
                   disabled={loading}
                 />
               </div>
@@ -312,7 +345,7 @@ export default function App() {
                   type="button"
                   onClick={runDemo}
                   disabled={loading}
-                  className="px-4 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-sm font-semibold rounded-xl transition-all flex items-center gap-2 cursor-pointer"
+                  className="px-4 py-3 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-800 text-sm font-semibold rounded-xl transition-all flex items-center gap-2 cursor-pointer dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-700 dark:text-slate-200"
                   title="Run instant analysis on bundled demo app"
                 >
                   <Cpu className="w-4 h-4 text-purple-400" />
@@ -341,7 +374,7 @@ export default function App() {
         {/* Live Progress Pipeline Stepper */}
         {(loading || activeStep > 0) && (
           <section className="glass-card rounded-2xl p-6 border border-slate-800 space-y-4">
-            <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-2">
               <Terminal className="w-4 h-4 text-indigo-400" />
               3-Agent Sequential Audit Pipeline
             </h3>
@@ -351,10 +384,11 @@ export default function App() {
               <div
                 className={`p-4 rounded-xl border transition-all ${
                   activeStep >= 1
-                    ? activeStep > 1
-                      ? 'bg-slate-900/90 border-emerald-500/40 text-emerald-300'
-                      : 'bg-indigo-950/40 border-indigo-500/50 text-indigo-200 glow-indigo'
-                    : 'bg-slate-900/30 border-slate-800/60 text-slate-600'
+                    ?  activeStep > 1
+                        ? 'bg-emerald-50 border-emerald-300 text-emerald-800 dark:bg-slate-900/90 dark:border-emerald-500/40 dark:text-emerald-300'
+                        : 'bg-indigo-50 border-indigo-300 text-indigo-800 glow-indigo dark:bg-indigo-950/40 dark:border-indigo-500/50 dark:text-indigo-200'
+                      : 'bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-900/30 dark:border-slate-800/60 dark:text-slate-300'
+
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
@@ -370,7 +404,7 @@ export default function App() {
                     <span className="text-xs text-slate-600">Queued</span>
                   )}
                 </div>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-slate-600 dark:text-slate-400">
                   Scans regex + Shannon entropy secrets, SQLi, CMDi, hardcoded keys.
                 </p>
               </div>
@@ -380,9 +414,10 @@ export default function App() {
                 className={`p-4 rounded-xl border transition-all ${
                   activeStep >= 2
                     ? activeStep > 2
-                      ? 'bg-slate-900/90 border-emerald-500/40 text-emerald-300'
-                      : 'bg-indigo-950/40 border-indigo-500/50 text-indigo-200 glow-indigo'
-                    : 'bg-slate-900/30 border-slate-800/60 text-slate-600'
+                        ? 'bg-emerald-50 border-emerald-300 text-emerald-800 dark:bg-slate-900/90 dark:border-emerald-500/40 dark:text-emerald-300'
+                        : 'bg-indigo-50 border-indigo-300 text-indigo-800 glow-indigo dark:bg-indigo-950/40 dark:border-indigo-500/50 dark:text-indigo-200'
+                      : 'bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-900/30 dark:border-slate-800/60 dark:text-slate-300'
+
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
@@ -398,7 +433,7 @@ export default function App() {
                     <span className="text-xs text-slate-600">Queued</span>
                   )}
                 </div>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-slate-600 dark:text-slate-400">
                   Detects cyclomatic complexity, resource leaks, missing tests.
                 </p>
               </div>
@@ -407,14 +442,15 @@ export default function App() {
               <div
                 className={`p-4 rounded-xl border transition-all ${
                   activeStep >= 3
-                    ? activeStep > 3
-                      ? 'bg-slate-900/90 border-emerald-500/40 text-emerald-300'
-                      : 'bg-purple-950/40 border-purple-500/50 text-purple-200 glow-purple'
-                    : 'bg-slate-900/30 border-slate-800/60 text-slate-600'
+                    ?  activeStep > 3
+                      ? 'bg-emerald-50 border-emerald-300 text-emerald-800 dark:bg-slate-900/90 dark:border-emerald-500/40 dark:text-emerald-300'
+                      : 'bg-purple-50 border-purple-300 text-purple-800 glow-purple dark:bg-purple-950/40 dark:border-purple-500/50 dark:text-purple-200'
+                    : 'bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-900/30 dark:border-slate-800/60 dark:text-slate-300'
+
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-semibold text-sm flex items-center gap-2 text-purple-300">
+                  <span className="font-semibold text-sm flex items-center gap-2 text-purple-800 dark:text-purple-300">
                     <Zap className="w-4 h-4 text-purple-400" />
                     3. Auto-Fix (Hero Feature)
                   </span>
@@ -426,7 +462,7 @@ export default function App() {
                     <span className="text-xs text-slate-600">Queued</span>
                   )}
                 </div>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-slate-600 dark:text-slate-400">
                   Generates unified diffs & verifies in isolated sandbox environment.
                 </p>
               </div>
@@ -441,25 +477,25 @@ export default function App() {
             <div className="glass-card rounded-2xl p-6 border border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="px-2.5 py-0.5 text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-full font-mono">
+                  <span className="px-2.5 py-0.5 text-xs font-semibold bg-indigo-500/20 text-indigo-700 border border-indigo-500/30 rounded-full font-mono dark:text-indigo-300">
                     {results.pr.repo}
                   </span>
-                  <span className="text-xs text-slate-400">by @{results.pr.author}</span>
+                  <span className="text-xs text-slate-600 dark:text-slate-400">by @{results.pr.author}</span>
                 </div>
-                <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
                   <GitPullRequest className="w-5 h-5 text-indigo-400 shrink-0" />
                   {results.pr.title}
                 </h2>
               </div>
 
               <div className="flex items-center gap-4 text-xs text-slate-400">
-                <div className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800">
-                  <span className="text-slate-500 block">Files Analyzed</span>
-                  <strong className="text-slate-200 font-mono">{results.files_analyzed.length} Python Files</strong>
+                <div className="px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-200 dark:bg-slate-900 dark:border-slate-800">
+                  <span className="text-slate-600 dark:text-slate-500 block">Files Analyzed</span>
+                  <strong className="text-slate-800 dark:text-slate-200 font-mono">{results.files_analyzed.length} Python Files</strong>
                 </div>
-                <div className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800">
-                  <span className="text-slate-500 block">Execution Speed</span>
-                  <strong className="text-slate-200 font-mono">{results.summary.execution_time_sec}s</strong>
+                <div className="px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-200 dark:bg-slate-900 dark:border-slate-800">
+                  <span className="text-slate-600 dark:text-slate-500 block">Execution Speed</span>
+                  <strong className="text-slate-800 dark:text-slate-200 font-mono">{results.summary.execution_time_sec}s</strong>
                 </div>
               </div>
             </div>
@@ -535,7 +571,7 @@ export default function App() {
 
               {/* 3-Category Breakdown */}
               <div className="lg:col-span-2 glass-card rounded-2xl p-6 border border-slate-800 space-y-5">
-                <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center justify-between">
                   <span>Deterministic Score Breakdown</span>
                   <span className="text-xs font-normal text-slate-500">Exact Math Formula & Deductions</span>
                 </h3>
@@ -544,11 +580,11 @@ export default function App() {
                   {/* Security Category */}
                   <div className="space-y-1.5">
                     <div className="flex justify-between text-xs">
-                      <span className="font-semibold text-slate-200 flex items-center gap-1.5">
+                      <span className="font-semibold text-slate-800 dark:text-slate-300 flex items-center gap-1.5">
                         <Lock className="w-3.5 h-3.5 text-rose-400" />
                         Security & Vulnerabilities
                       </span>
-                      <span className="font-mono text-slate-300 font-bold">
+                      <span className="font-mono text-slate-800 dark:text-slate-300 font-bold">
                         {results.health_score.categories.security.score} / 40 pts
                       </span>
                     </div>
@@ -560,7 +596,7 @@ export default function App() {
                         }}
                       />
                     </div>
-                    <div className="text-[11px] font-mono text-slate-400 flex justify-between">
+                    <div className="text-[11px] font-mono text-slate-600 dark:text-slate-400 flex justify-between">
                       <span>Math: {results.health_score.categories.security.math}</span>
                       <span>Critical (-20) | High (-10)</span>
                     </div>
@@ -569,11 +605,11 @@ export default function App() {
                   {/* Quality Category */}
                   <div className="space-y-1.5">
                     <div className="flex justify-between text-xs">
-                      <span className="font-semibold text-slate-200 flex items-center gap-1.5">
+                      <span className="font-semibold text-slate-800 dark:text-slate-300 flex items-center gap-1.5">
                         <Bug className="w-3.5 h-3.5 text-amber-400" />
                         Code Quality & Architecture
                       </span>
-                      <span className="font-mono text-slate-300 font-bold">
+                      <span className="font-mono text-slate-800 dark:text-slate-300 font-bold">
                         {results.health_score.categories.quality.score} / 30 pts
                       </span>
                     </div>
@@ -585,7 +621,7 @@ export default function App() {
                         }}
                       />
                     </div>
-                    <div className="text-[11px] font-mono text-slate-400 flex justify-between">
+                    <div className="text-[11px] font-mono text-slate-600 dark:text-slate-400 flex justify-between">
                       <span>Math: {results.health_score.categories.quality.math}</span>
                       <span>Medium (-5) | Low (-2)</span>
                     </div>
@@ -594,11 +630,11 @@ export default function App() {
                   {/* Testing Category */}
                   <div className="space-y-1.5">
                     <div className="flex justify-between text-xs">
-                      <span className="font-semibold text-slate-200 flex items-center gap-1.5">
+                      <span className="font-semibold text-slate-800 dark:text-slate-300 flex items-center gap-1.5">
                         <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
                         Test Suite & Coverage
                       </span>
-                      <span className="font-mono text-slate-300 font-bold">
+                      <span className="font-mono text-slate-800 dark:text-slate-300 font-bold">
                         {results.health_score.categories.testing.score} / 30 pts
                       </span>
                     </div>
@@ -627,7 +663,7 @@ export default function App() {
                       <span className="px-2.5 py-0.5 text-xs font-extrabold bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-md uppercase tracking-wider">
                         Hero Feature
                       </span>
-                      <h3 className="text-xl font-extrabold text-white flex items-center gap-2">
+                      <h3 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
                         <Zap className="w-5 h-5 text-purple-400" />
                         Verified Auto-Fixes Panel ({results.summary.verified_fixes}/{results.fixes.length} Verified)
                       </h3>
@@ -656,7 +692,7 @@ export default function App() {
                             #{idx + 1}
                           </span>
                           <div>
-                            <h4 className="text-base font-bold text-white flex items-center gap-2">
+                            <h4 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                               {fix.category}
                               {fix.status === 'verified' ? (
                                 <span className="px-2 py-0.5 text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-md flex items-center gap-1">
@@ -668,7 +704,7 @@ export default function App() {
                                 </span>
                               )}
                             </h4>
-                            <span className="text-xs text-slate-400 font-mono">
+                            <span className="text-xs text-slate-700 dark:text-slate-400 font-mono">
                               File: {fix.file}
                             </span>
                           </div>
@@ -677,7 +713,7 @@ export default function App() {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => handleCopyDiff(fix.id, fix.diff)}
-                            className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 flex items-center gap-1.5 cursor-pointer transition-all"
+                            className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-xs font-semibold text-slate-800 flex items-center gap-1.5 cursor-pointer transition-all dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-700 dark:text-slate-200"
                           >
                             {copiedFixId === fix.id ? (
                               <>
@@ -703,13 +739,13 @@ export default function App() {
                       </div>
 
                       {/* Verification Status Message */}
-                      <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 text-xs font-mono text-slate-300 flex items-center gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                      <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-mono text-emerald-900 flex items-center gap-2 dark:bg-slate-950/80 dark:border-slate-800 dark:text-slate-300">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                         <span>{fix.verification_log}</span>
                       </div>
 
                       {/* Unified Red/Green Diff Code Viewer */}
-                      <div className="rounded-xl overflow-hidden border border-slate-800 bg-[#090d16] font-mono text-xs">
+                      <div className="code-viewer rounded-xl overflow-hidden border border-slate-800 bg-[#090d16] font-mono text-xs">
                         <div className="bg-slate-950 px-4 py-2 border-b border-slate-800 text-slate-400 flex items-center justify-between">
                           <span>
                             Unified Diff Patch: <strong>{fix.file}</strong>
@@ -746,7 +782,7 @@ export default function App() {
             <section className="glass-card rounded-2xl p-6 border border-slate-800 space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                     <ShieldAlert className="w-5 h-5 text-amber-400" />
                     Audit Findings ({filteredFindings.length})
                   </h3>
@@ -755,7 +791,7 @@ export default function App() {
                   </p>
                 </div>
 
-                <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs font-semibold">
+                <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-semibold">
                   {['all', 'critical', 'high', 'medium', 'low'].map((sev) => (
                     <button
                       key={sev}
@@ -763,7 +799,7 @@ export default function App() {
                       className={`px-3 py-1.5 rounded-lg capitalize transition-all cursor-pointer ${
                         severityFilter === sev
                           ? 'bg-indigo-600 text-white shadow'
-                          : 'text-slate-400 hover:text-slate-200'
+                          : 'text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                       }`}
                     >
                       {sev}
@@ -776,7 +812,7 @@ export default function App() {
                 {filteredFindings.map((finding) => (
                   <div
                     key={finding.id}
-                    className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition-all space-y-3"
+                    className="p-4 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all space-y-3"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="space-y-1">
@@ -788,7 +824,7 @@ export default function App() {
                           >
                             {finding.severity}
                           </span>
-                          <span className="font-semibold text-slate-100 text-sm">
+                          <span className="font-semibold text-slate-900 dark:text-slate-100 text-sm">
                             {finding.category}
                           </span>
                           {finding.auto_fixable === false && (
@@ -811,7 +847,7 @@ export default function App() {
                             {finding.file}:{finding.line}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-300">{finding.description}</p>
+                        <p className="text-xs text-slate-700 dark:text-slate-300">{finding.description}</p>
                         {finding.manual_review_note && (
                           <div className="mt-1 p-2 rounded-lg bg-amber-950/30 border border-amber-500/20 text-xs text-amber-200 flex items-center gap-2">
                             <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
@@ -820,14 +856,14 @@ export default function App() {
                         )}
                       </div>
 
-                      <span className="px-2 py-1 text-[10px] font-mono bg-slate-800 text-slate-400 rounded border border-slate-700 shrink-0">
+                      <span className="px-2 py-1 text-[10px] font-mono bg-slate-100 text-slate-700 border-slate-300 rounded border shrink-0 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700">
                         {finding.cwe}
                       </span>
                     </div>
 
                     {finding.explanation && (
-                      <div className="p-3 rounded-lg bg-slate-950/80 border border-slate-800 text-xs text-slate-400 space-y-1">
-                        <strong className="text-indigo-300 font-semibold block flex items-center gap-1">
+                      <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-400 space-y-1">
+                        <strong className="text-indigo-700 dark:text-indigo-300 font-semibold block flex items-center gap-1">
                           <Sparkles className="w-3.5 h-3.5 text-indigo-400" /> Plain Language Explanation:
                         </strong>
                         <p>{finding.explanation}</p>
@@ -835,7 +871,7 @@ export default function App() {
                     )}
 
                     {finding.code_snippet && (
-                      <div className="bg-slate-950 p-2.5 rounded-lg font-mono text-xs text-slate-300 overflow-x-auto border border-slate-800">
+                      <div className="code-viewer bg-slate-950 p-2.5 rounded-lg font-mono text-xs text-slate-300 overflow-x-auto border border-slate-800">
                         <code>{finding.code_snippet}</code>
                       </div>
                     )}
