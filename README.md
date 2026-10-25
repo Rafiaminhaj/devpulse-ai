@@ -134,3 +134,11 @@ JIRA_PROJECT_KEY=DEV
 ## Hackathon Submission
 
 Built for **hackFront India 2026 - AI & Developer Tools Track**.
+
+
+---
+
+## 📚 Developer Resources
+
+Preparing for Python, Backend & AI coding interviews?  
+Check out [**The Ultimate Python & Coding Interview Cheat Sheet (2026 Edition)**](https://payhip.com/b/PgoZz) authored by the maintainer.
