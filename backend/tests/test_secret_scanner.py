@@ -70,3 +70,18 @@ def sk_helper(task):
 SKIP_LIST = ["sk-test", "sk-proj-short", "AKIA_PLACEHOLDER"]
 '''
     assert scan_file_for_secrets("clean.py", clean) == []
+
+def test_detects_github_fine_grained_pat_and_slack_webhook_without_matching_nearby_text():
+    github_pat = "github_pat_" + "a1B2c3D4_" * 10 + "a1B2c3D4"  # 82 chars after prefix
+    slack_webhook = "https://hooks.slack.com/services/TABCDE/B12345/AbCd1234"
+    content = "\n".join([
+        f'github_token = "{github_pat}"',
+        f'slack_url = "{slack_webhook}"',
+        "github_pat_placeholder = 'github_pat_short'",
+        "docs = 'https://hooks.slack.com/services/TEXAMPLE/BEXAMPLE/'",
+    ])
+
+    descriptions = _descriptions(content)
+    assert any("GitHub Fine-grained Personal Access Token" in d for d in descriptions), descriptions
+    assert any("Slack Incoming Webhook" in d for d in descriptions), descriptions
+    assert len(descriptions) == 2, descriptions

@@ -10,6 +10,8 @@ SECRET_PATTERNS = [
     (r"sk-ant-api03-[A-Za-z0-9_-]{80,}", "Anthropic API Key", "critical"),
     (r"(?i)aws_secret_access_key\s*=\s*['\"]([A-Za-z0-9/+=]{40})['\"]", "AWS Secret Access Key", "critical"),
     (r"ghp_[a-zA-Z0-9]{36}", "GitHub Personal Access Token", "critical"),
+    (r"github_pat_[A-Za-z0-9_]{82}", "GitHub Fine-grained Personal Access Token", "critical"),
+    (r"https://hooks\.slack\.com/services/T[A-Z0-9_]+/B[A-Z0-9_]+/[A-Za-z0-9]+", "Slack Incoming Webhook", "critical"),
     (r"gho_[a-zA-Z0-9]{36}", "GitHub OAuth Access Token", "critical"),
     (r"glpat-[a-zA-Z0-9\-]{20}", "GitLab Personal Access Token", "critical"),
     (r"xox[baprs]-[0-9a-zA-Z]{10,48}", "Slack API Token", "critical"),
