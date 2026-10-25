@@ -5,6 +5,9 @@ from typing import List, Dict, Any
 # Common regex patterns for secrets & credentials
 SECRET_PATTERNS = [
     (r"AKIA[0-9A-Z]{16}", "AWS Access Key ID", "critical"),
+    (r"sk-proj-[A-Za-z0-9_-]{40,}", "OpenAI API Key (project)", "critical"),
+    (r"sk-(?!proj-|ant-)[a-zA-Z0-9]{48}", "OpenAI API Key (legacy)", "critical"),
+    (r"sk-ant-api03-[A-Za-z0-9_-]{80,}", "Anthropic API Key", "critical"),
     (r"(?i)aws_secret_access_key\s*=\s*['\"]([A-Za-z0-9/+=]{40})['\"]", "AWS Secret Access Key", "critical"),
     (r"ghp_[a-zA-Z0-9]{36}", "GitHub Personal Access Token", "critical"),
     (r"gho_[a-zA-Z0-9]{36}", "GitHub OAuth Access Token", "critical"),
