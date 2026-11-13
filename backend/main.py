@@ -1,7 +1,10 @@
 import os
 import sys
 import glob
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
@@ -13,7 +16,7 @@ from agents.pipeline import DevPulsePipeline
 from github_service import fetch_github_pr_files
 
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 app = FastAPI(
     title="DevPulse AI API",
@@ -21,6 +24,19 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# Intializing the limiter & custom 429 handler
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
+    return JSONResponse(
+        status_code=429,
+        content={
+            "error": "Too Many Requests",
+            "detail": "Rate limit exceeded. Maximum 20 requests per minute is allowed"
+        }
+    )
 # Enable CORS for Next.js / React frontend
 app.add_middleware(
     CORSMiddleware,
@@ -66,7 +82,8 @@ def health_check():
     }
 
 @app.post("/api/analyze-pr")
-def analyze_pr(req: PRAnalysisRequest):
+@limiter.limit("20/minute")
+def analyze_pr(request: Request,req: PRAnalysisRequest):
     if not req.pr_url or not req.pr_url.strip():
         raise HTTPException(status_code=400, detail="GitHub PR URL is required.")
     
@@ -80,7 +97,8 @@ def analyze_pr(req: PRAnalysisRequest):
         raise HTTPException(status_code=500, detail=f"Analysis pipeline error: {str(e)}")
 
 @app.get("/api/analyze-demo")
-def analyze_demo():
+@limiter.limit("20/minute")
+def analyze_demo(request: Request):
     """Runs instant analysis on local demo vulnerable app."""
     demo_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "demo", "vulnerable_app")
     
